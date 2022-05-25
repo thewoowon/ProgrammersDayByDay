@@ -1,25 +1,74 @@
+ï»¿
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
+#include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 
-int solution(int n) {
-    int answer = 0;
+vector<int> solution(vector<string> id_list, vector<string> report, int k) {
 
-    // °¡Àå ÀÛÀº ³ª´®°ªÀ» »êÃâÇÏ¶ó.
-    // ÇØ´Â Ç×»ó 2ÀÌ»óÀÇ ¼öÀÌ´Ù.
-    int divisor = 2;
-    while (true)
+    unordered_map<string, int> reportMap1; // ê° ì•„ì´ë””ë³„ ì‹ ê³ ë‹¹í•œ íšŸìˆ˜
+    unordered_map<string, vector<string>> reportMap2; // ê° ì•„ì´ë””ë³„ ì‹ ê³ í•œ ì•„ì´ë””ë¥¼ ì •ë¦¬í•˜ëŠ” ë§µ
+    unordered_map<string, unordered_map<string, int>> reportMap3;
+    vector<int> result;
+
+    for (int i = 0; i < id_list.size(); i++)
     {
-        if (n - 1 % divisor == 0) //¿ÏÀüÈ÷ ³ª´©¾î ¶³¾îÁø´Ù¸é ¸®ÅÏ
-            return divisor;
-        else
-            divisor += 1;
+        vector<string> element1;
+        unordered_map<string, int> element2;
+        reportMap1.insert(make_pair(id_list[i], 0)); // ì´ˆê¸°í™”
+        reportMap2.insert(make_pair(id_list[i], element1));
+        reportMap3.insert(make_pair(id_list[i], element2));
     }
+        
+    for (int i = 0; i < report.size(); i++)
+    {
+        int index = report[i].find(' '); // ê³µë°±ì„ ì°¾ì•„ë‚´ê³  í•´ë‹¹ ì¸ë±ìŠ¤ë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤.
+        int indexPlus = index + 1;
+        //Map1ì˜ ì¹´ìš´íŠ¸ë¥¼ ì˜¬ë¦¬ê¸° ì „ì— Map2ì— ê°€ì„œ í‚¤ê°€ ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸í•©ë‹ˆë‹¤.
+        string reporter = report[i].substr(0, index);
+        string respondent = report[i].substr(indexPlus, report[i].size()- indexPlus);
+        reportMap2[reporter].push_back(respondent);
+        if (reportMap3[reporter].find(respondent) != reportMap3[reporter].end()) // ìˆë‹¤ëŠ” ê²ƒ ìì²´ê°€ ì´ë¯¸ 1ì´ë¼ëŠ” ê²ƒ...
+        {
+            continue;
+        }
+        else
+        {
+            reportMap3[reporter].insert(make_pair(respondent, 1));
+            reportMap1[respondent] += 1; // ì‹ ê³ ë‹¹í•œ ì‚¬ëŒ
+        }
+    }
+    
+    for (int i = 0; i < id_list.size(); i++)
+    {
+        vector<string> reportList = reportMap2[id_list[i]];
+        sort(reportList.begin(), reportList.end());
+        vector<string>::iterator uniques = unique(reportList.begin(), reportList.end());
+        reportList.erase(uniques, reportList.end());
+        int count = 0;
+        for (int j = 0; j < reportList.size(); j++)
+        {
+            if (reportMap1[reportList[j]] >= k)
+            {
+                count += 1;
+            }
+        }
+        result.push_back(count);
+    }
+   
+    return result;
 }
 
-int main() {
-    cout << solution(10) << endl;
-    cout << solution(12) << endl;
+int main()
+{
+    vector<string> id_list = { "muzi", "frodo", "apeach", "neo","ryan" };
+    vector<string> report = {"ryan frodo"};
+    //vector<string> id_list = { "muzi", "frodo", "apeach", "neo","ryan"};
+    //vector<string> report = {"ryan frodo","muzi frodo", "apeach frodo", "frodo neo", "muzi neo", "apeach muzi","muzi frodo","apeach muzi","neo muzi"};
+    int k = 2;
+
+    solution(id_list, report, k);
 }
